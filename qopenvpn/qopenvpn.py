@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-import sys, os, subprocess, re, urllib2
+import sys, os, subprocess, re, urllib2, socket
 from PyQt4 import QtCore, QtGui
 
 from ui_qopenvpnsettings import Ui_QOpenVPNSettings
@@ -46,7 +46,7 @@ class QOpenVPNLogViewer(QtGui.QDialog, Ui_QOpenVPNLogViewer):
         """Get external IP address and hostname"""
         try:
             html = urllib2.urlopen("http://checkip.dyndns.org").read()
-            ip = re_ip.search(html).group(1)
+            ip = self.re_ip.search(html).group("ip")
         except:
             ip = ""
 

@@ -6,10 +6,10 @@ from qopenvpn import version
 
 setup(name = "QOpenVPN",
       version = version.__version__,
-      description = "Simple OpenVPN GUI which uses systemd",
-      author = "Michal Krenek",
+      description = "Simple OpenVPN GUI written in PyQt for systemd based distributions",
+      author = "Michal Krenek (Mikos)",
       author_email = "m.krenek@gmail.com",
-      url = "http://qopenvpn.eutopia.cz",
+      url = "https://github.com/xmikos/qopenvpn",
       license = "GNU GPLv3",
       packages = ["qopenvpn"],
       package_data = {"qopenvpn": ["openvpn.svg", "openvpn_disabled.svg"]},
