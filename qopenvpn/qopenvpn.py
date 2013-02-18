@@ -122,12 +122,12 @@ class QOpenVPNWidget(QtGui.QWidget):
     def update_status(self):
         """Update GUI according to OpenVPN status"""
         vpn_status = self.vpn_status()
-        if vpn_status and not self.vpn_enabled:
+        if vpn_status:
             self.vpn_enabled = True
             self.trayIcon.setIcon(self.iconActive)
             self.startAction.setEnabled(False)
             self.stopAction.setEnabled(True)
-        elif not vpn_status and self.vpn_enabled:
+        else:
             self.vpn_enabled = False
             self.trayIcon.setIcon(self.iconDisabled)
             self.startAction.setEnabled(True)
