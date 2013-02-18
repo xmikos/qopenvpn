@@ -13,6 +13,8 @@ setup(name = "QOpenVPN",
       license = "GNU GPLv3",
       packages = ["qopenvpn"],
       package_data = {"qopenvpn": ["openvpn.svg", "openvpn_disabled.svg"]},
+      data_files = [("share/applications", ["qopenvpn.desktop"]),
+                    ("share/pixmaps", ["qopenvpn.png"])],
       scripts = ["scripts/qopenvpn"],
       requires = ["PyQt4"],
 )
