@@ -111,8 +111,8 @@ class QOpenVPNWidget(QtGui.QWidget):
     def create_icon(self):
         """Create system tray icon"""
         self.trayIcon = QtGui.QSystemTrayIcon(self)
-        self.iconActive = QtGui.QIcon("openvpn.svg")
-        self.iconDisabled = QtGui.QIcon("openvpn_disabled.svg")
+        self.iconActive = QtGui.QIcon("%s/openvpn.svg" % os.path.dirname(os.path.abspath(__file__)))
+        self.iconDisabled = QtGui.QIcon("%s/openvpn_disabled.svg" % os.path.dirname(os.path.abspath(__file__)))
         self.trayIcon.activated.connect(self.icon_activated)
         self.trayIcon.setContextMenu(self.trayIconMenu)
         self.trayIcon.setIcon(self.iconDisabled)
