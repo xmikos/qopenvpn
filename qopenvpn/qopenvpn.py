@@ -95,7 +95,7 @@ class QOpenVPNWidget(QtGui.QWidget):
         self.logsAction = QtGui.QAction(self.tr("Show &logs ..."), self)
         self.logsAction.triggered.connect(self.logs)
         self.quitAction = QtGui.QAction(self.tr("&Quit"), self)
-        self.quitAction.triggered.connect(QtGui.qApp.quit)
+        self.quitAction.triggered.connect(self.quit)
 
     def create_menu(self):
         """Create menu and add items to it"""
@@ -178,6 +178,15 @@ class QOpenVPNWidget(QtGui.QWidget):
                 self.vpn_stop()
             else:
                 self.vpn_start()
+
+    def quit(self):
+        """Quit QOpenVPN GUI (and ask before quitting if OpenVPN is still running)"""
+        if self.vpn_enabled:
+            reply = QtGui.QMessageBox.question(self, self.tr(u"QOpenVPN - Quit"),
+                                               self.tr(u"You are still connected to VPN! Do you really want to quit QOpenVPN GUI (OpenVPN service will keep running in background)?"),
+                                               QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+            if reply == QtGui.QMessageBox.Yes:
+                QtGui.qApp.quit()
 
 def main():
     app = QtGui.QApplication(sys.argv)
