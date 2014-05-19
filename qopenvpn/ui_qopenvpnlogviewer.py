@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'qopenvpn/qopenvpnlogviewer.ui'
 #
-# Created: Tue Feb 12 17:28:24 2013
-#      by: PyQt4 UI code generator 4.9.6
+# Created: Tue May 20 01:27:37 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 

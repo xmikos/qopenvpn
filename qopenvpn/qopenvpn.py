@@ -17,12 +17,15 @@ class QOpenVPNSettings(QtGui.QDialog, Ui_QOpenVPNSettings):
         self.sudoCommandEdit.setText(settings.value("sudo_command").toString() or "kdesu")
         if settings.value("use_sudo").toBool():
             self.sudoCheckBox.setChecked(True)
+        if settings.value("show_warning").toBool():
+            self.warningCheckBox.setChecked(True)
 
     def accept(self):
         settings = QtCore.QSettings()
         settings.setValue("vpn_name", QtCore.QVariant(self.vpnNameEdit.text()))
         settings.setValue("sudo_command", QtCore.QVariant(self.sudoCommandEdit.text()))
         settings.setValue("use_sudo", QtCore.QVariant(self.sudoCheckBox.isChecked()))
+        settings.setValue("show_warning", QtCore.QVariant(self.warningCheckBox.isChecked()))
         QtGui.QDialog.accept(self)
 
 class QOpenVPNLogViewer(QtGui.QDialog, Ui_QOpenVPNLogViewer):
@@ -119,8 +122,9 @@ class QOpenVPNWidget(QtGui.QWidget):
         self.trayIcon.setToolTip("QOpenVPN")
         self.trayIcon.show()
 
-    def update_status(self):
+    def update_status(self, disable_warning=False):
         """Update GUI according to OpenVPN status"""
+        settings = QtCore.QSettings()
         vpn_status = self.vpn_status()
         if vpn_status:
             self.vpn_enabled = True
@@ -128,6 +132,9 @@ class QOpenVPNWidget(QtGui.QWidget):
             self.startAction.setEnabled(False)
             self.stopAction.setEnabled(True)
         else:
+            if not disable_warning and settings.value("show_warning").toBool() and self.vpn_enabled:
+                QtGui.QMessageBox.warning(self, self.tr(u"QOpenVPN - Warning"),
+                                          self.tr(u"You have been disconnected from VPN!"))
             self.vpn_enabled = False
             self.trayIcon.setIcon(self.iconDisabled)
             self.startAction.setEnabled(True)
@@ -152,7 +159,7 @@ class QOpenVPNWidget(QtGui.QWidget):
         """Stop OpenVPN service"""
         retcode = self.systemctl("stop")
         if retcode == 0:
-            self.update_status()
+            self.update_status(disable_warning=True)
 
     def vpn_status(self):
         """Check if OpenVPN service is running"""
