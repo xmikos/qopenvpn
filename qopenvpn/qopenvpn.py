@@ -127,18 +127,19 @@ class QOpenVPNWidget(QtGui.QWidget):
         settings = QtCore.QSettings()
         vpn_status = self.vpn_status()
         if vpn_status:
-            self.vpn_enabled = True
             self.trayIcon.setIcon(self.iconActive)
             self.startAction.setEnabled(False)
             self.stopAction.setEnabled(True)
+            self.vpn_enabled = True
         else:
+            self.trayIcon.setIcon(self.iconDisabled)
+            self.startAction.setEnabled(True)
+            self.stopAction.setEnabled(False)
+
             if not disable_warning and settings.value("show_warning").toBool() and self.vpn_enabled:
                 QtGui.QMessageBox.warning(self, self.tr(u"QOpenVPN - Warning"),
                                           self.tr(u"You have been disconnected from VPN!"))
             self.vpn_enabled = False
-            self.trayIcon.setIcon(self.iconDisabled)
-            self.startAction.setEnabled(True)
-            self.stopAction.setEnabled(False)
 
     def systemctl(self, command, disable_sudo=False):
         """Run systemctl command"""
@@ -194,6 +195,8 @@ class QOpenVPNWidget(QtGui.QWidget):
                                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
             if reply == QtGui.QMessageBox.Yes:
                 QtGui.qApp.quit()
+        else:
+            QtGui.qApp.quit()
 
 def main():
     app = QtGui.QApplication(sys.argv)
