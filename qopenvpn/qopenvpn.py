@@ -1,12 +1,11 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
 
 import sys, os, subprocess, socket
 from PyQt4 import QtCore, QtGui
 
-import stun
-from ui_qopenvpnsettings import Ui_QOpenVPNSettings
-from ui_qopenvpnlogviewer import Ui_QOpenVPNLogViewer
+from qopenvpn import stun
+from qopenvpn.ui_qopenvpnsettings import Ui_QOpenVPNSettings
+from qopenvpn.ui_qopenvpnlogviewer import Ui_QOpenVPNLogViewer
 
 
 class QOpenVPNSettings(QtGui.QDialog, Ui_QOpenVPNSettings):
@@ -15,11 +14,11 @@ class QOpenVPNSettings(QtGui.QDialog, Ui_QOpenVPNSettings):
         self.setupUi(self)
 
         settings = QtCore.QSettings()
-        self.vpnNameEdit.setText(settings.value("vpn_name").toString())
-        self.sudoCommandEdit.setText(settings.value("sudo_command").toString() or "kdesu")
-        if settings.value("use_sudo").toBool():
+        self.vpnNameEdit.setText(settings.value("vpn_name"))
+        self.sudoCommandEdit.setText(settings.value("sudo_command") or "kdesu")
+        if settings.value("use_sudo", type=bool):
             self.sudoCheckBox.setChecked(True)
-        if settings.value("show_warning").toBool():
+        if settings.value("show_warning", type=bool):
             self.warningCheckBox.setChecked(True)
 
     def accept(self):
@@ -42,9 +41,9 @@ class QOpenVPNLogViewer(QtGui.QDialog, Ui_QOpenVPNLogViewer):
         """Run journalctl command and get OpenVPN logs"""
         settings = QtCore.QSettings()
         cmdline = []
-        if not disable_sudo and settings.value("use_sudo").toBool():
-            cmdline.append(str(settings.value("sudo_command").toString()) or "sudo")
-        cmdline.extend(["journalctl", "-b", "-u", "openvpn@%s" % str(settings.value("vpn_name").toString())])
+        if not disable_sudo and settings.value("use_sudo", type=bool):
+            cmdline.append(settings.value("sudo_command") or "sudo")
+        cmdline.extend(["journalctl", "-b", "-u", "openvpn@{}".format(settings.value("vpn_name"))])
         try:
             output = subprocess.check_output(cmdline)
         except subprocess.CalledProcessError as e:
@@ -77,7 +76,7 @@ class QOpenVPNLogViewer(QtGui.QDialog, Ui_QOpenVPNLogViewer):
         self.logViewerEdit.verticalScrollBar().setValue(self.logViewerEdit.verticalScrollBar().maximum())
 
         ip = self.getip()
-        self.ipAddressEdit.setText("%s (%s)" % (ip[0], ip[1]) if ip[1] else ip[0])
+        self.ipAddressEdit.setText("{} ({})".format(ip[0], ip[1]) if ip[1] else ip[0])
 
 
 class QOpenVPNWidget(QtGui.QWidget):
@@ -122,8 +121,8 @@ class QOpenVPNWidget(QtGui.QWidget):
     def create_icon(self):
         """Create system tray icon"""
         self.trayIcon = QtGui.QSystemTrayIcon(self)
-        self.iconActive = QtGui.QIcon("%s/openvpn.svg" % os.path.dirname(os.path.abspath(__file__)))
-        self.iconDisabled = QtGui.QIcon("%s/openvpn_disabled.svg" % os.path.dirname(os.path.abspath(__file__)))
+        self.iconActive = QtGui.QIcon("{}/openvpn.svg".format(os.path.dirname(os.path.abspath(__file__))))
+        self.iconDisabled = QtGui.QIcon("{}/openvpn_disabled.svg".format(os.path.dirname(os.path.abspath(__file__))))
         self.trayIcon.activated.connect(self.icon_activated)
         self.trayIcon.setContextMenu(self.trayIconMenu)
         self.trayIcon.setIcon(self.iconDisabled)
@@ -144,18 +143,18 @@ class QOpenVPNWidget(QtGui.QWidget):
             self.startAction.setEnabled(True)
             self.stopAction.setEnabled(False)
 
-            if not disable_warning and settings.value("show_warning").toBool() and self.vpn_enabled:
-                QtGui.QMessageBox.warning(self, self.tr(u"QOpenVPN - Warning"),
-                                          self.tr(u"You have been disconnected from VPN!"))
+            if not disable_warning and settings.value("show_warning", type=bool) and self.vpn_enabled:
+                QtGui.QMessageBox.warning(self, self.tr("QOpenVPN - Warning"),
+                                          self.tr("You have been disconnected from VPN!"))
             self.vpn_enabled = False
 
     def systemctl(self, command, disable_sudo=False):
         """Run systemctl command"""
         settings = QtCore.QSettings()
         cmdline = []
-        if not disable_sudo and settings.value("use_sudo").toBool():
-            cmdline.append(str(settings.value("sudo_command").toString()) or "sudo")
-        cmdline.extend(["systemctl", command, "openvpn@%s" % str(settings.value("vpn_name").toString())])
+        if not disable_sudo and settings.value("use_sudo", type=bool):
+            cmdline.append(settings.value("sudo_command") or "sudo")
+        cmdline.extend(["systemctl", command, "openvpn@{}".format(settings.value("vpn_name"))])
         return subprocess.call(cmdline)
 
     def vpn_start(self):
@@ -199,9 +198,9 @@ class QOpenVPNWidget(QtGui.QWidget):
         """Quit QOpenVPN GUI (and ask before quitting if OpenVPN is still running)"""
         if self.vpn_enabled:
             reply = QtGui.QMessageBox.question(
-                self, self.tr(u"QOpenVPN - Quit"),
-                self.tr(u"You are still connected to VPN! Do you really want to quit "
-                        u"QOpenVPN GUI (OpenVPN service will keep running in background)?"),
+                self, self.tr("QOpenVPN - Quit"),
+                self.tr("You are still connected to VPN! Do you really want to quit "
+                        "QOpenVPN GUI (OpenVPN service will keep running in background)?"),
                 QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No
             )
             if reply == QtGui.QMessageBox.Yes:

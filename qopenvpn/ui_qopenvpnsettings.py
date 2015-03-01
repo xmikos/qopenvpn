@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'qopenvpn/qopenvpnsettings.ui'
 #
-# Created: Tue May 20 01:27:37 2014
-#      by: PyQt4 UI code generator 4.10.4
+# Created: Sun Mar  1 23:11:00 2015
+#      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
 
