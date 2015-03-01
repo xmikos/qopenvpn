@@ -1,11 +1,13 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-import sys, os, subprocess, re, urllib2, socket
+import sys, os, subprocess, socket
 from PyQt4 import QtCore, QtGui
 
+import stun
 from ui_qopenvpnsettings import Ui_QOpenVPNSettings
 from ui_qopenvpnlogviewer import Ui_QOpenVPNLogViewer
+
 
 class QOpenVPNSettings(QtGui.QDialog, Ui_QOpenVPNSettings):
     def __init__(self, parent=None):
@@ -28,11 +30,11 @@ class QOpenVPNSettings(QtGui.QDialog, Ui_QOpenVPNSettings):
         settings.setValue("show_warning", QtCore.QVariant(self.warningCheckBox.isChecked()))
         QtGui.QDialog.accept(self)
 
+
 class QOpenVPNLogViewer(QtGui.QDialog, Ui_QOpenVPNLogViewer):
     def __init__(self, parent=None):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
-        self.re_ip = re.compile("<body>Current IP Address: (?P<ip>.*?)</body>")
         self.refreshButton.clicked.connect(self.refresh)
         self.refresh()
 
@@ -43,13 +45,17 @@ class QOpenVPNLogViewer(QtGui.QDialog, Ui_QOpenVPNLogViewer):
         if not disable_sudo and settings.value("use_sudo").toBool():
             cmdline.append(str(settings.value("sudo_command").toString()) or "sudo")
         cmdline.extend(["journalctl", "-b", "-u", "openvpn@%s" % str(settings.value("vpn_name").toString())])
-        return subprocess.check_output(cmdline)
+        try:
+            output = subprocess.check_output(cmdline)
+        except subprocess.CalledProcessError as e:
+            output = e.output
+        return output
 
     def getip(self):
         """Get external IP address and hostname"""
         try:
-            html = urllib2.urlopen("http://checkip.dyndns.org").read()
-            ip = self.re_ip.search(html).group("ip")
+            stunclient = stun.StunClient()
+            ip, port = stunclient.get_ip()
         except:
             ip = ""
 
@@ -66,11 +72,13 @@ class QOpenVPNLogViewer(QtGui.QDialog, Ui_QOpenVPNLogViewer):
         QtCore.QTimer.singleShot(0, self.refresh_timeout)
 
     def refresh_timeout(self):
-        """Move scrollbar to bottom and refresh IP address (must be called by single shot timer or else scrollbar sometimes doesn't move)"""
+        """Move scrollbar to bottom and refresh IP address
+        (must be called by single shot timer or else scrollbar sometimes doesn't move)"""
         self.logViewerEdit.verticalScrollBar().setValue(self.logViewerEdit.verticalScrollBar().maximum())
 
         ip = self.getip()
         self.ipAddressEdit.setText("%s (%s)" % (ip[0], ip[1]) if ip[1] else ip[0])
+
 
 class QOpenVPNWidget(QtGui.QWidget):
     def __init__(self, parent=None):
@@ -190,13 +198,17 @@ class QOpenVPNWidget(QtGui.QWidget):
     def quit(self):
         """Quit QOpenVPN GUI (and ask before quitting if OpenVPN is still running)"""
         if self.vpn_enabled:
-            reply = QtGui.QMessageBox.question(self, self.tr(u"QOpenVPN - Quit"),
-                                               self.tr(u"You are still connected to VPN! Do you really want to quit QOpenVPN GUI (OpenVPN service will keep running in background)?"),
-                                               QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+            reply = QtGui.QMessageBox.question(
+                self, self.tr(u"QOpenVPN - Quit"),
+                self.tr(u"You are still connected to VPN! Do you really want to quit "
+                        u"QOpenVPN GUI (OpenVPN service will keep running in background)?"),
+                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No
+            )
             if reply == QtGui.QMessageBox.Yes:
                 QtGui.qApp.quit()
         else:
             QtGui.qApp.quit()
+
 
 def main():
     app = QtGui.QApplication(sys.argv)
@@ -206,6 +218,7 @@ def main():
     app.setQuitOnLastWindowClosed(False)
     window = QOpenVPNWidget()
     sys.exit(app.exec_())
+
 
 if __name__ == "__main__":
     main()
