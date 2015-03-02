@@ -6,7 +6,7 @@ Simple OpenVPN GUI written in PyQt for systemd based distributions
 Requirements
 ------------
 
-- Python >= 3.2
+- Python >= 3.3
 - PyQt >= 4.5
 - OpenVPN
 - systemd with journald

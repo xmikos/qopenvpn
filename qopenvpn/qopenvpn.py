@@ -10,7 +10,7 @@ from qopenvpn.ui_qopenvpnlogviewer import Ui_QOpenVPNLogViewer
 
 class QOpenVPNSettings(QtGui.QDialog, Ui_QOpenVPNSettings):
     def __init__(self, parent=None):
-        QtGui.QDialog.__init__(self, parent)
+        super().__init__(parent)
         self.setupUi(self)
 
         settings = QtCore.QSettings()
@@ -38,7 +38,7 @@ class QOpenVPNSettings(QtGui.QDialog, Ui_QOpenVPNSettings):
 
 class QOpenVPNLogViewer(QtGui.QDialog, Ui_QOpenVPNLogViewer):
     def __init__(self, parent=None):
-        QtGui.QDialog.__init__(self, parent)
+        super().__init__(parent)
         self.setupUi(self)
         self.refreshButton.clicked.connect(self.refresh)
         self.refresh()
@@ -87,7 +87,7 @@ class QOpenVPNLogViewer(QtGui.QDialog, Ui_QOpenVPNLogViewer):
 
 class QOpenVPNWidget(QtGui.QWidget):
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        super().__init__(parent)
         self.vpn_enabled = False
 
         self.create_actions()
