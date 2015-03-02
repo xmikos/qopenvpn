@@ -100,6 +100,11 @@ class QOpenVPNWidget(QtGui.QWidget):
         self.timer.timeout.connect(self.update_status)
         self.timer.start(10000)
 
+        # Setup system tray icon doubleclick timer
+        self.icon_doubleclick_timer = QtCore.QTimer(self)
+        self.icon_doubleclick_timer.setSingleShot(True)
+        self.icon_doubleclick_timer.timeout.connect(self.icon_doubleclick_timeout)
+
     def create_actions(self):
         """Create actions and connect relevant signals"""
         self.startAction = QtGui.QAction(self.tr("&Start"), self)
@@ -194,11 +199,19 @@ class QOpenVPNWidget(QtGui.QWidget):
 
     def icon_activated(self, reason):
         """Start or stop OpenVPN by double-click on tray icon"""
-        if reason == QtGui.QSystemTrayIcon.DoubleClick:
-            if self.vpn_enabled:
-                self.vpn_stop()
+        if reason == QtGui.QSystemTrayIcon.Trigger:
+            if self.icon_doubleclick_timer.isActive():
+                self.icon_doubleclick_timer.stop()
+                if self.vpn_enabled:
+                    self.vpn_stop()
+                else:
+                    self.vpn_start()
             else:
-                self.vpn_start()
+                self.icon_doubleclick_timer.start(QtGui.qApp.doubleClickInterval())
+
+    def icon_doubleclick_timeout(self):
+        """Action performed after single-click on tray icon"""
+        pass
 
     def quit(self):
         """Quit QOpenVPN GUI (and ask before quitting if OpenVPN is still running)"""
