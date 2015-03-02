@@ -103,7 +103,7 @@ class QOpenVPNWidget(QtGui.QWidget):
         # Update status every 10 seconds
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_status)
-        self.timer.start(10000)
+        self.timer.start(5000)
 
         # Setup system tray icon doubleclick timer
         self.icon_doubleclick_timer = QtCore.QTimer(self)
