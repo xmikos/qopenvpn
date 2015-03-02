@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 
-import sys, os, subprocess, socket, glob
+import sys, os, subprocess, socket, glob, signal
 from PyQt4 import QtCore, QtGui
 
 from qopenvpn import stun
 from qopenvpn.ui_qopenvpnsettings import Ui_QOpenVPNSettings
 from qopenvpn.ui_qopenvpnlogviewer import Ui_QOpenVPNLogViewer
+
+
+# Allow CTRL+C and/or SIGTERM to kill us (PyQt blocks it otherwise)
+signal.signal(signal.SIGINT, signal.SIG_DFL)
+signal.signal(signal.SIGTERM, signal.SIG_DFL)
 
 
 class QOpenVPNSettings(QtGui.QDialog, Ui_QOpenVPNSettings):
