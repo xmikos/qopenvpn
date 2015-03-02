@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os, subprocess, socket
+import sys, os, subprocess, socket, glob
 from PyQt4 import QtCore, QtGui
 
 from qopenvpn import stun
@@ -14,19 +14,25 @@ class QOpenVPNSettings(QtGui.QDialog, Ui_QOpenVPNSettings):
         self.setupUi(self)
 
         settings = QtCore.QSettings()
-        self.vpnNameEdit.setText(settings.value("vpn_name"))
         self.sudoCommandEdit.setText(settings.value("sudo_command") or "kdesu")
-        if settings.value("use_sudo", type=bool):
-            self.sudoCheckBox.setChecked(True)
-        if settings.value("show_warning", type=bool):
-            self.warningCheckBox.setChecked(True)
+        self.sudoCheckBox.setChecked(settings.value("use_sudo", False, type=bool))
+        self.warningCheckBox.setChecked(settings.value("show_warning", False, type=bool))
+
+        # Fill VPN combo box with .conf files from /etc/openvpn
+        for f in sorted(glob.glob("/etc/openvpn/*.conf")):
+            vpn_name = os.path.splitext(os.path.basename(f))[0]
+            self.vpnNameComboBox.addItem(vpn_name)
+
+        i = self.vpnNameComboBox.findText(settings.value("vpn_name"))
+        if i > -1:
+            self.vpnNameComboBox.setCurrentIndex(i)
 
     def accept(self):
         settings = QtCore.QSettings()
-        settings.setValue("vpn_name", QtCore.QVariant(self.vpnNameEdit.text()))
-        settings.setValue("sudo_command", QtCore.QVariant(self.sudoCommandEdit.text()))
-        settings.setValue("use_sudo", QtCore.QVariant(self.sudoCheckBox.isChecked()))
-        settings.setValue("show_warning", QtCore.QVariant(self.warningCheckBox.isChecked()))
+        settings.setValue("sudo_command", self.sudoCommandEdit.text())
+        settings.setValue("use_sudo", self.sudoCheckBox.isChecked())
+        settings.setValue("show_warning", self.warningCheckBox.isChecked())
+        settings.setValue("vpn_name", self.vpnNameComboBox.currentText())
         QtGui.QDialog.accept(self)
 
 
