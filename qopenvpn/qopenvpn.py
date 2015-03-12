@@ -204,7 +204,7 @@ class QOpenVPNWidget(QtGui.QWidget):
 
     def icon_activated(self, reason):
         """Start or stop OpenVPN by double-click on tray icon"""
-        if reason == QtGui.QSystemTrayIcon.Trigger:
+        if reason == QtGui.QSystemTrayIcon.Trigger or reason == QtGui.QSystemTrayIcon.DoubleClick:
             if self.icon_doubleclick_timer.isActive():
                 self.icon_doubleclick_timer.stop()
                 if self.vpn_enabled:
