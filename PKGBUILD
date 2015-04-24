@@ -6,7 +6,7 @@ pkgdesc="Simple OpenVPN GUI written in PyQt for systemd based distributions"
 arch=('any')
 url="https://github.com/xmikos/qopenvpn"
 license=('GPL3')
-depends=('python-pyqt4')
+depends=('python-pyqt4' 'openvpn' 'systemd')
 source=(https://github.com/xmikos/qopenvpn/archive/v$pkgver.tar.gz)
 
 build() {
