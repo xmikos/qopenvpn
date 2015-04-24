@@ -7,7 +7,7 @@ arch=('any')
 url="https://github.com/xmikos/qopenvpn"
 license=('GPL3')
 depends=('python-pyqt4')
-source=(https://github.com/xmikos/qopenvpn/archive/$pkgver.tar.gz)
+source=(https://github.com/xmikos/qopenvpn/archive/v$pkgver.tar.gz)
 
 build() {
   cd "$srcdir/$pkgname-$pkgver"
