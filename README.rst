@@ -15,16 +15,16 @@ Requirements
 Usage
 -----
 
-If you want to use systemctl without password prompt, you should add this line to /etc/sudoers (use visudo command for it):
+If you want to use systemctl without password prompt, you should add this line to /etc/sudoers (use visudo command for it)::
 
     %wheel ALL=(ALL) NOPASSWD: /usr/bin/systemctl
 
-And then add yourself to wheel group:
+And then add yourself to wheel group::
 
     gpasswd -a your_username wheel
 
 An alternative is to use kdesu instead of sudo (set this in QOpenVPN settings), but then you have to use password for every operation.
 
-You should also add yourself to adm group for log viewer to work:
+You should also add yourself to adm group for log viewer to work::
 
     gpasswd -a your_username adm

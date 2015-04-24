@@ -15,4 +15,16 @@ setup(name="QOpenVPN",
       data_files=[("share/applications", ["qopenvpn.desktop"]),
                   ("share/pixmaps", ["qopenvpn.png"])],
       scripts=["scripts/qopenvpn"],
-      requires=["PyQt4"])
+      requires=["PyQt4"],
+      classifiers=[
+          'Development Status :: 5 - Production/Stable',
+          'Environment :: X11 Applications :: Qt',
+          'Intended Audience :: End Users/Desktop',
+          'Intended Audience :: System Administrators',
+          'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+          'Natural Language :: English',
+          'Operating System :: POSIX :: Linux',
+          'Programming Language :: Python :: 3',
+          'Topic :: Security :: Cryptography',
+          'Topic :: System :: Networking'
+    ])
