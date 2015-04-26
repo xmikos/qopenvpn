@@ -30,9 +30,6 @@ setup(
             "qopenvpn=qopenvpn.__main__:main"
         ],
     },
-    install_requires=[
-        "PyQt4"  # PyQt is incompatible with pip, must be installed manually
-    ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: X11 Applications :: Qt",
