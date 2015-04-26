@@ -1,6 +1,6 @@
 # Maintainer: Michal Krenek (Mikos) <m.krenek@gmail.com>
 pkgname=qopenvpn
-pkgver=1.3.1
+pkgver=1.3.2
 pkgrel=1
 pkgdesc="Simple OpenVPN GUI written in PyQt for systemd based distributions"
 arch=('any')
