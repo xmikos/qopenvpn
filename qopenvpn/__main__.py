@@ -55,8 +55,8 @@ class QOpenVPNSettings(QtGui.QDialog, Ui_QOpenVPNSettings):
             settings.setValue("service_name", "openvpn")
 
 
-        # Fill VPN combo box with .conf files from /etc/openvpn
-        for f in sorted(glob.glob("/etc/openvpn/*.conf")):
+        # Fill VPN combo box with .conf files from /etc/openvpn{,/client}
+        for f in sorted(glob.glob(settings.value("config_location"))):
             vpn_name = os.path.splitext(os.path.basename(f))[0]
             self.vpnNameComboBox.addItem(vpn_name)
 
@@ -86,7 +86,7 @@ class QOpenVPNLogViewer(QtGui.QDialog, Ui_QOpenVPNLogViewer):
         cmdline = []
         if not disable_sudo and settings.value("use_sudo", type=bool):
             cmdline.append(settings.value("sudo_command") or "sudo")
-        cmdline.extend(["journalctl", "-b", "-u", "openvpn@{}".format(settings.value("vpn_name"))])
+        cmdline.extend(["journalctl", "-b", "-u", "{}@{}".format(settings.value("service_name"), settings.value("vpn_name"))])
         try:
             output = subprocess.check_output(cmdline)
         except subprocess.CalledProcessError as e:
@@ -202,7 +202,7 @@ class QOpenVPNWidget(QtGui.QWidget):
         cmdline = []
         if not disable_sudo and settings.value("use_sudo", type=bool):
             cmdline.append(settings.value("sudo_command") or "sudo")
-        cmdline.extend(["systemctl", command, "openvpn@{}".format(settings.value("vpn_name"))])
+        cmdline.extend(["systemctl", command, "{}@{}".format(settings.value("service_name"), settings.value("vpn_name"))])
         return subprocess.call(cmdline)
 
     def vpn_start(self):
