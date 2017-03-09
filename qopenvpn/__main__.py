@@ -23,8 +23,40 @@ class QOpenVPNSettings(QtGui.QDialog, Ui_QOpenVPNSettings):
         self.sudoCheckBox.setChecked(settings.value("use_sudo", False, type=bool))
         self.warningCheckBox.setChecked(settings.value("show_warning", False, type=bool))
 
-        # Fill VPN combo box with .conf files from /etc/openvpn
-        for f in sorted(glob.glob("/etc/openvpn/*.conf")):
+
+        # Checks for the new location of OpenVPN configuration files introduced in OpenVPN 2.4
+        # See https://github.com/OpenVPN/openvpn/blob/master/Changes.rst#user-visible-changes
+        # "The configuration files are picked up from the /etc/openvpn/server/ and /etc/openvpn/client/ directories (depending on unit file)."
+        # Remove this unaesthetic version check when openvpn 2.4 is widely accepcted
+
+        output, _ = subprocess.Popen(["/usr/bin/env", "openvpn", "--version"], stdout=subprocess.PIPE).communicate()
+
+        # Take second tuple of version output (i.e. `2.4.0`)
+        # and extract its major and minor components (i.e. 2 and 4)
+        versionString = output.decode("utf8").split()[1]
+        versionComponents = versionString.split(".")
+
+        if len(versionComponents) >= 2:
+            major, minor = versionComponents[0:2]
+
+            major = int(major)
+            minor = int(minor)
+
+        else:
+            print("Couldn't determine the installed OpenVPN version, assuming v0.0", file=sys.stderr)
+            major = minor = 0
+
+        # Matches version 2.4.x or greater
+        if major >= 2 and minor >= 4:
+            settings.setValue("config_location", "/etc/openvpn/client/*.conf")
+            settings.setValue("service_name", "openvpn-client")
+        else:
+            settings.setValue("config_location", "/etc/openvpn/*.conf")
+            settings.setValue("service_name", "openvpn")
+
+
+        # Fill VPN combo box with .conf files from /etc/openvpn{,/client}
+        for f in sorted(glob.glob(settings.value("config_location"))):
             vpn_name = os.path.splitext(os.path.basename(f))[0]
             self.vpnNameComboBox.addItem(vpn_name)
 
@@ -54,7 +86,7 @@ class QOpenVPNLogViewer(QtGui.QDialog, Ui_QOpenVPNLogViewer):
         cmdline = []
         if not disable_sudo and settings.value("use_sudo", type=bool):
             cmdline.append(settings.value("sudo_command") or "sudo")
-        cmdline.extend(["journalctl", "-b", "-u", "openvpn@{}".format(settings.value("vpn_name"))])
+        cmdline.extend(["journalctl", "-b", "-u", "{}@{}".format(settings.value("service_name"), settings.value("vpn_name"))])
         try:
             output = subprocess.check_output(cmdline)
         except subprocess.CalledProcessError as e:
@@ -170,7 +202,7 @@ class QOpenVPNWidget(QtGui.QWidget):
         cmdline = []
         if not disable_sudo and settings.value("use_sudo", type=bool):
             cmdline.append(settings.value("sudo_command") or "sudo")
-        cmdline.extend(["systemctl", command, "openvpn@{}".format(settings.value("vpn_name"))])
+        cmdline.extend(["systemctl", command, "{}@{}".format(settings.value("service_name"), settings.value("vpn_name"))])
         return subprocess.call(cmdline)
 
     def vpn_start(self):
