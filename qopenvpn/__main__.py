@@ -28,20 +28,22 @@ class QOpenVPNSettings(QtWidgets.QDialog, Ui_QOpenVPNSettings):
         # "The configuration files are picked up from the /etc/openvpn/server/ and
         # /etc/openvpn/client/ directories (depending on unit file)."
         # Remove this unaesthetic version check when openvpn 2.4 is widely accepcted
-
-        output, _ = subprocess.Popen(["/usr/bin/env", "openvpn", "--version"], stdout=subprocess.PIPE).communicate()
+        try:
+            output = subprocess.check_output(["/usr/bin/env", "openvpn", "--version"])
+        except subprocess.CalledProcessError as e:
+            output = e.output
+        except OSError:
+            print("OpenVPN executable not found!", file=sys.stderr)
+            output = ""
 
         # Take second tuple of version output (i.e. `2.4.0`)
         # and extract its major and minor components (i.e. 2 and 4)
-        versionString = output.decode("utf8").split()[1]
-        versionComponents = versionString.split(".")
-
-        if len(versionComponents) >= 2:
-            major, minor = versionComponents[0:2]
-
+        version_string = output.decode("utf8").split()[1] if output else ""
+        version_components = version_string.split(".")
+        if len(version_components) >= 2:
+            major, minor = version_components[0:2]
             major = int(major)
             minor = int(minor)
-
         else:
             print("Couldn't determine the installed OpenVPN version, assuming v0.0", file=sys.stderr)
             major = minor = 0
@@ -112,7 +114,7 @@ class QOpenVPNLogViewer(QtWidgets.QDialog, Ui_QOpenVPNLogViewer):
 
     def refresh(self):
         """Refresh logs"""
-        self.logViewerEdit.setPlainText(self.journalctl(disable_sudo=True).decode("utf-8"))
+        self.logViewerEdit.setPlainText(self.journalctl(disable_sudo=True).decode("utf8"))
         QtCore.QTimer.singleShot(0, self.refresh_timeout)
 
     def refresh_timeout(self):
@@ -170,9 +172,14 @@ class QOpenVPNWidget(QtWidgets.QWidget):
 
     def create_icon(self):
         """Create system tray icon"""
-        self.trayIcon = QtWidgets.QSystemTrayIcon(self)
         self.iconActive = QtGui.QIcon("{}/openvpn.svg".format(os.path.dirname(os.path.abspath(__file__))))
         self.iconDisabled = QtGui.QIcon("{}/openvpn_disabled.svg".format(os.path.dirname(os.path.abspath(__file__))))
+
+        # Workaround for Plasma 5 not showing SVG icons
+        self.iconActive = QtGui.QIcon(self.iconActive.pixmap(128, 128))
+        self.iconDisabled = QtGui.QIcon(self.iconDisabled.pixmap(128, 128))
+
+        self.trayIcon = QtWidgets.QSystemTrayIcon(self)
         self.trayIcon.activated.connect(self.icon_activated)
         self.trayIcon.setContextMenu(self.trayIconMenu)
         self.trayIcon.setIcon(self.iconDisabled)
@@ -198,7 +205,7 @@ class QOpenVPNWidget(QtWidgets.QWidget):
                                               self.tr("You have been disconnected from VPN!"))
             self.vpn_enabled = False
 
-    def systemctl(self, command, disable_sudo=False):
+    def systemctl(self, command, disable_sudo=False, quiet=False):
         """Run systemctl command"""
         settings = QtCore.QSettings()
         cmdline = []
@@ -208,7 +215,8 @@ class QOpenVPNWidget(QtWidgets.QWidget):
             "systemctl", command,
             "{}@{}".format(settings.value("service_name"), settings.value("vpn_name"))
         ])
-        return subprocess.call(cmdline)
+        stdout = stderr = subprocess.DEVNULL if quiet else None
+        return subprocess.call(cmdline, stdout=stdout, stderr=stderr)
 
     def vpn_start(self):
         """Start OpenVPN service"""
@@ -224,7 +232,7 @@ class QOpenVPNWidget(QtWidgets.QWidget):
 
     def vpn_status(self):
         """Check if OpenVPN service is running"""
-        retcode = self.systemctl("is-active", disable_sudo=True)
+        retcode = self.systemctl("is-active", disable_sudo=True, quiet=True)
         return True if retcode == 0 else False
 
     def settings(self):
