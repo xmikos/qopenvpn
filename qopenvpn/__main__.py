@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys, os, subprocess, socket, glob, signal
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from qopenvpn import stun
 from qopenvpn.ui_qopenvpnsettings import Ui_QOpenVPNSettings
@@ -13,7 +13,7 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 signal.signal(signal.SIGTERM, signal.SIG_DFL)
 
 
-class QOpenVPNSettings(QtGui.QDialog, Ui_QOpenVPNSettings):
+class QOpenVPNSettings(QtWidgets.QDialog, Ui_QOpenVPNSettings):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
@@ -23,10 +23,10 @@ class QOpenVPNSettings(QtGui.QDialog, Ui_QOpenVPNSettings):
         self.sudoCheckBox.setChecked(settings.value("use_sudo", False, type=bool))
         self.warningCheckBox.setChecked(settings.value("show_warning", False, type=bool))
 
-
         # Checks for the new location of OpenVPN configuration files introduced in OpenVPN 2.4
         # See https://github.com/OpenVPN/openvpn/blob/master/Changes.rst#user-visible-changes
-        # "The configuration files are picked up from the /etc/openvpn/server/ and /etc/openvpn/client/ directories (depending on unit file)."
+        # "The configuration files are picked up from the /etc/openvpn/server/ and
+        # /etc/openvpn/client/ directories (depending on unit file)."
         # Remove this unaesthetic version check when openvpn 2.4 is widely accepcted
 
         output, _ = subprocess.Popen(["/usr/bin/env", "openvpn", "--version"], stdout=subprocess.PIPE).communicate()
@@ -54,7 +54,6 @@ class QOpenVPNSettings(QtGui.QDialog, Ui_QOpenVPNSettings):
             settings.setValue("config_location", "/etc/openvpn/*.conf")
             settings.setValue("service_name", "openvpn")
 
-
         # Fill VPN combo box with .conf files from /etc/openvpn{,/client}
         for f in sorted(glob.glob(settings.value("config_location"))):
             vpn_name = os.path.splitext(os.path.basename(f))[0]
@@ -70,10 +69,10 @@ class QOpenVPNSettings(QtGui.QDialog, Ui_QOpenVPNSettings):
         settings.setValue("use_sudo", self.sudoCheckBox.isChecked())
         settings.setValue("show_warning", self.warningCheckBox.isChecked())
         settings.setValue("vpn_name", self.vpnNameComboBox.currentText())
-        QtGui.QDialog.accept(self)
+        QtWidgets.QDialog.accept(self)
 
 
-class QOpenVPNLogViewer(QtGui.QDialog, Ui_QOpenVPNLogViewer):
+class QOpenVPNLogViewer(QtWidgets.QDialog, Ui_QOpenVPNLogViewer):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
@@ -86,7 +85,10 @@ class QOpenVPNLogViewer(QtGui.QDialog, Ui_QOpenVPNLogViewer):
         cmdline = []
         if not disable_sudo and settings.value("use_sudo", type=bool):
             cmdline.append(settings.value("sudo_command") or "sudo")
-        cmdline.extend(["journalctl", "-b", "-u", "{}@{}".format(settings.value("service_name"), settings.value("vpn_name"))])
+        cmdline.extend([
+            "journalctl", "-b", "-u",
+            "{}@{}".format(settings.value("service_name"), settings.value("vpn_name"))
+        ])
         try:
             output = subprocess.check_output(cmdline)
         except subprocess.CalledProcessError as e:
@@ -122,7 +124,7 @@ class QOpenVPNLogViewer(QtGui.QDialog, Ui_QOpenVPNLogViewer):
         self.ipAddressEdit.setText("{} ({})".format(ip[0], ip[1]) if ip[1] else ip[0])
 
 
-class QOpenVPNWidget(QtGui.QWidget):
+class QOpenVPNWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.vpn_enabled = False
@@ -144,20 +146,20 @@ class QOpenVPNWidget(QtGui.QWidget):
 
     def create_actions(self):
         """Create actions and connect relevant signals"""
-        self.startAction = QtGui.QAction(self.tr("&Start"), self)
+        self.startAction = QtWidgets.QAction(self.tr("&Start"), self)
         self.startAction.triggered.connect(self.vpn_start)
-        self.stopAction = QtGui.QAction(self.tr("S&top"), self)
+        self.stopAction = QtWidgets.QAction(self.tr("S&top"), self)
         self.stopAction.triggered.connect(self.vpn_stop)
-        self.settingsAction = QtGui.QAction(self.tr("S&ettings ..."), self)
+        self.settingsAction = QtWidgets.QAction(self.tr("S&ettings ..."), self)
         self.settingsAction.triggered.connect(self.settings)
-        self.logsAction = QtGui.QAction(self.tr("Show &logs ..."), self)
+        self.logsAction = QtWidgets.QAction(self.tr("Show &logs ..."), self)
         self.logsAction.triggered.connect(self.logs)
-        self.quitAction = QtGui.QAction(self.tr("&Quit"), self)
+        self.quitAction = QtWidgets.QAction(self.tr("&Quit"), self)
         self.quitAction.triggered.connect(self.quit)
 
     def create_menu(self):
         """Create menu and add items to it"""
-        self.trayIconMenu = QtGui.QMenu(self)
+        self.trayIconMenu = QtWidgets.QMenu(self)
         self.trayIconMenu.addAction(self.startAction)
         self.trayIconMenu.addAction(self.stopAction)
         self.trayIconMenu.addSeparator()
@@ -168,7 +170,7 @@ class QOpenVPNWidget(QtGui.QWidget):
 
     def create_icon(self):
         """Create system tray icon"""
-        self.trayIcon = QtGui.QSystemTrayIcon(self)
+        self.trayIcon = QtWidgets.QSystemTrayIcon(self)
         self.iconActive = QtGui.QIcon("{}/openvpn.svg".format(os.path.dirname(os.path.abspath(__file__))))
         self.iconDisabled = QtGui.QIcon("{}/openvpn_disabled.svg".format(os.path.dirname(os.path.abspath(__file__))))
         self.trayIcon.activated.connect(self.icon_activated)
@@ -192,8 +194,8 @@ class QOpenVPNWidget(QtGui.QWidget):
             self.stopAction.setEnabled(False)
 
             if not disable_warning and settings.value("show_warning", type=bool) and self.vpn_enabled:
-                QtGui.QMessageBox.warning(self, self.tr("QOpenVPN - Warning"),
-                                          self.tr("You have been disconnected from VPN!"))
+                QtWidgets.QMessageBox.warning(self, self.tr("QOpenVPN - Warning"),
+                                              self.tr("You have been disconnected from VPN!"))
             self.vpn_enabled = False
 
     def systemctl(self, command, disable_sudo=False):
@@ -202,7 +204,10 @@ class QOpenVPNWidget(QtGui.QWidget):
         cmdline = []
         if not disable_sudo and settings.value("use_sudo", type=bool):
             cmdline.append(settings.value("sudo_command") or "sudo")
-        cmdline.extend(["systemctl", command, "{}@{}".format(settings.value("service_name"), settings.value("vpn_name"))])
+        cmdline.extend([
+            "systemctl", command,
+            "{}@{}".format(settings.value("service_name"), settings.value("vpn_name"))
+        ])
         return subprocess.call(cmdline)
 
     def vpn_start(self):
@@ -236,7 +241,7 @@ class QOpenVPNWidget(QtGui.QWidget):
 
     def icon_activated(self, reason):
         """Start or stop OpenVPN by double-click on tray icon"""
-        if reason == QtGui.QSystemTrayIcon.Trigger or reason == QtGui.QSystemTrayIcon.DoubleClick:
+        if reason == QtWidgets.QSystemTrayIcon.Trigger or reason == QtWidgets.QSystemTrayIcon.DoubleClick:
             if self.icon_doubleclick_timer.isActive():
                 self.icon_doubleclick_timer.stop()
                 if self.vpn_enabled:
@@ -244,7 +249,7 @@ class QOpenVPNWidget(QtGui.QWidget):
                 else:
                     self.vpn_start()
             else:
-                self.icon_doubleclick_timer.start(QtGui.qApp.doubleClickInterval())
+                self.icon_doubleclick_timer.start(QtWidgets.QApplication.doubleClickInterval())
 
     def icon_doubleclick_timeout(self):
         """Action performed after single-click on tray icon"""
@@ -253,20 +258,20 @@ class QOpenVPNWidget(QtGui.QWidget):
     def quit(self):
         """Quit QOpenVPN GUI (and ask before quitting if OpenVPN is still running)"""
         if self.vpn_enabled:
-            reply = QtGui.QMessageBox.question(
+            reply = QtWidgets.QMessageBox.question(
                 self, self.tr("QOpenVPN - Quit"),
                 self.tr("You are still connected to VPN! Do you really want to quit "
                         "QOpenVPN GUI (OpenVPN service will keep running in background)?"),
-                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No
             )
-            if reply == QtGui.QMessageBox.Yes:
-                QtGui.qApp.quit()
+            if reply == QtWidgets.QMessageBox.Yes:
+                QtWidgets.QApplication.quit()
         else:
-            QtGui.qApp.quit()
+            QtWidgets.QApplication.quit()
 
 
 def main():
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     app.setOrganizationName("QOpenVPN")
     app.setOrganizationDomain("qopenvpn.eutopia.cz")
     app.setApplicationName("QOpenVPN")

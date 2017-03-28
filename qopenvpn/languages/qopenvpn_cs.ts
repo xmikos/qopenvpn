@@ -3,17 +3,17 @@
 <context>
     <name>QOpenVPNLogViewer</name>
     <message>
-        <location filename="ui_qopenvpnlogviewer.py" line="63"/>
+        <location filename="../ui_qopenvpnlogviewer.py" line="49"/>
         <source>QOpenVPN Log Viewer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="ui_qopenvpnlogviewer.py" line="64"/>
+        <location filename="../ui_qopenvpnlogviewer.py" line="50"/>
         <source>IP address:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="ui_qopenvpnlogviewer.py" line="65"/>
+        <location filename="../ui_qopenvpnlogviewer.py" line="51"/>
         <source>Refresh</source>
         <translation type="unfinished"></translation>
     </message>
@@ -21,27 +21,27 @@
 <context>
     <name>QOpenVPNSettings</name>
     <message>
-        <location filename="ui_qopenvpnsettings.py" line="71"/>
+        <location filename="../ui_qopenvpnsettings.py" line="57"/>
         <source>QOpenVPN Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="ui_qopenvpnsettings.py" line="72"/>
+        <location filename="../ui_qopenvpnsettings.py" line="58"/>
         <source>VPN name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="ui_qopenvpnsettings.py" line="73"/>
+        <location filename="../ui_qopenvpnsettings.py" line="59"/>
         <source>Show warning when disconnected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="ui_qopenvpnsettings.py" line="74"/>
+        <location filename="../ui_qopenvpnsettings.py" line="60"/>
         <source>Use sudo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="ui_qopenvpnsettings.py" line="75"/>
+        <location filename="../ui_qopenvpnsettings.py" line="61"/>
         <source>Sudo command:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -49,47 +49,47 @@
 <context>
     <name>QOpenVPNWidget</name>
     <message>
-        <location filename="qopenvpn.py" line="101"/>
+        <location filename="../__main__.py" line="151"/>
         <source>&amp;Start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qopenvpn.py" line="103"/>
+        <location filename="../__main__.py" line="153"/>
         <source>S&amp;top</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qopenvpn.py" line="105"/>
+        <location filename="../__main__.py" line="155"/>
         <source>S&amp;ettings ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qopenvpn.py" line="109"/>
+        <location filename="../__main__.py" line="159"/>
         <source>&amp;Quit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qopenvpn.py" line="107"/>
+        <location filename="../__main__.py" line="157"/>
         <source>Show &amp;logs ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qopenvpn.py" line="149"/>
+        <location filename="../__main__.py" line="199"/>
         <source>QOpenVPN - Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qopenvpn.py" line="149"/>
+        <location filename="../__main__.py" line="199"/>
         <source>You have been disconnected from VPN!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qopenvpn.py" line="202"/>
+        <location filename="../__main__.py" line="263"/>
         <source>QOpenVPN - Quit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qopenvpn.py" line="202"/>
+        <location filename="../__main__.py" line="263"/>
         <source>You are still connected to VPN! Do you really want to quit QOpenVPN GUI (OpenVPN service will keep running in background)?</source>
         <translation type="unfinished"></translation>
     </message>
