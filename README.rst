@@ -7,7 +7,7 @@ Requirements
 ------------
 
 - Python >= 3.3
-- PyQt >= 4.5
+- PyQt 5
 - OpenVPN
 - systemd with journald
 - sudo and/or kdesu
