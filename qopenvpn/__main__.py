@@ -49,7 +49,7 @@ class QOpenVPNSettings(QtWidgets.QDialog, Ui_QOpenVPNSettings):
             major = minor = 0
 
         # Matches version 2.4.x or greater
-        if major >= 2 and minor >= 4:
+        if (major > 2) or (major == 2 and minor >= 4):
             settings.setValue("config_location", "/etc/openvpn/client/*.conf")
             settings.setValue("service_name", "openvpn-client")
         else:
